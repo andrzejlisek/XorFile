@@ -1,0 +1,949 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>580</width>
+    <height>451</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>XOR file create and recovery</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="ToolTab">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="ToolTabXor">
+       <attribute name="title">
+        <string>Define bunch</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="XorProjectPanel">
+          <item>
+           <widget class="QPushButton" name="ProjectNew">
+            <property name="text">
+             <string>New</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ProjectLoad">
+            <property name="text">
+             <string>Open</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ProjectSave">
+            <property name="text">
+             <string>Save</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ProjectSaveAs">
+            <property name="text">
+             <string>Save as</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="PacketTable">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="verticalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Packet</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Status</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Index file</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Base directory</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Size</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="XorPacketPanel">
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="DataPacketN">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>15</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="DataPacketL">
+            <property name="text">
+             <string>Data packets:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QPushButton" name="PacketGetSizes">
+            <property name="text">
+             <string>Get sizes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="PacketStatus">
+            <item>
+             <property name="text">
+              <string>Exists</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Missing</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Add/Remove</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="PacketStatusL">
+            <property name="text">
+             <string>Status:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="PacketFileL">
+            <property name="text">
+             <string>Index file:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="PacketDirL">
+            <property name="text">
+             <string>Base directory:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="PacketFile"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="PacketDir"/>
+          </item>
+          <item row="3" column="3">
+           <widget class="QPushButton" name="PacketDirBrowse">
+            <property name="text">
+             <string>Browse directory</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QPushButton" name="PacketFileBrowse">
+            <property name="text">
+             <string>Browse file</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QPushButton" name="PacketFileEdit">
+            <property name="text">
+             <string>Load to index editor</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="ToolTabXorWork">
+       <attribute name="title">
+        <string>Recover missing or add/remove</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="XorSectionPanel">
+          <item>
+           <widget class="QPushButton" name="ScenarioGenerate">
+            <property name="text">
+             <string>Generate scenario</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ScenarioSetWaiting">
+            <property name="text">
+             <string>Set as waiting</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ScenarioSetDone">
+            <property name="text">
+             <string>Set as done</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ScenarioSetPostponed">
+            <property name="text">
+             <string>Set as postponed</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ScenarioPerform">
+            <property name="text">
+             <string>Perform waiting</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="XorPacketRange">
+          <item>
+           <widget class="QLabel" name="Range1L">
+            <property name="text">
+             <string>Begin offset:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="Range1T">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="Range2L">
+            <property name="text">
+             <string>End offset:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="Range2T">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="RangeWhole">
+            <property name="text">
+             <string>Whole packet</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="PacketChunkL">
+            <property name="text">
+             <string>Chunk size (MB):</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="PacketChunkT">
+            <property name="text">
+             <string>64</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="ScenarioViewerT">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="verticalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Status</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Operation</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="ScenarioProgress">
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="textVisible">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="ToolTabIntegrity">
+       <attribute name="title">
+        <string>Bunch integrity</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QFrame" name="frame">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QTableWidget" name="IntegrityRangeList">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Begin</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>End</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Size</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>P status</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Q status</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="IntegrityRangeAction">
+              <item>
+               <widget class="QPushButton" name="IntegrityRangeAdd">
+                <property name="text">
+                 <string>Add stripes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityRangeRem">
+                <property name="text">
+                 <string>Remove selected stripe</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityRangeRemAll">
+                <property name="text">
+                 <string>Remove all stripes</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QFrame" name="frame_2">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="IntegrityScenarioAction">
+              <item>
+               <widget class="QComboBox" name="IntegrityMode">
+                <item>
+                 <property name="text">
+                  <string>P only</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Q only</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>P and Q</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityScenarioGen">
+                <property name="text">
+                 <string>Generate</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityScenarioSetWaiting">
+                <property name="text">
+                 <string>Set as waiting</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityScenarioSetDone">
+                <property name="text">
+                 <string>Set as done</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityScenarioSetPostponed">
+                <property name="text">
+                 <string>Set as postponed</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityScenarioPerform">
+                <property name="text">
+                 <string>Perform waiting</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="IntegrityScenarioView">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Status</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Operation</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="IntegrityScenarioProgress">
+              <property name="maximum">
+               <number>1000</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLabel" name="IntegrityTempFileL">
+                <property name="text">
+                 <string>Temporary file:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="IntegrityTempFileT"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="IntegrityTempFileBrowse">
+                <property name="text">
+                 <string>Browse file</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="IntegrityChunkSizeL">
+                <property name="text">
+                 <string>Chunk size (MB):</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="IntegrityChunkSizeT">
+                <property name="text">
+                 <string>64</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="ToolTabFile">
+       <attribute name="title">
+        <string>Index editor</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="FileIndexPanel">
+          <item>
+           <widget class="QPushButton" name="IndexClear">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="IndexLoad">
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="IndexSave">
+            <property name="text">
+             <string>Save</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="IndexSaveAs">
+            <property name="text">
+             <string>Save as</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="FileIndexSizeL">
+            <property name="text">
+             <string>Packet size:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="FileIndexSize">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="FileIndexTable">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="verticalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Size</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Begin</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>End</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Digest</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Status</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="FilePacketPanel">
+          <item>
+           <widget class="QPushButton" name="FilePacketAdd">
+            <property name="text">
+             <string>Add existing file</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FilePacketBlank">
+            <property name="text">
+             <string>Add new file</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FilePacketRem">
+            <property name="text">
+             <string>Remove</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FilePacketMoveUp">
+            <property name="text">
+             <string>Move up</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FilePacketMoveDown">
+            <property name="text">
+             <string>Move down</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="FileDigestPanel1">
+          <item>
+           <widget class="QPushButton" name="FileDigestCalc">
+            <property name="text">
+             <string>Get digest - selected</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDigestCalcAll">
+            <property name="text">
+             <string>Get digest - all</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDigestCheck">
+            <property name="text">
+             <string>Test digest - selected</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDigestCheckAll">
+            <property name="text">
+             <string>Test digest - all</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="FileDigestSet">
+            <property name="text">
+             <string>Change digest</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDigestSize">
+            <property name="text">
+             <string>Change size</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDigestClearInfo">
+            <property name="text">
+             <string>Clear status</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileOffsetBegin">
+            <property name="text">
+             <string>To begin</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileOffsetEnd">
+            <property name="text">
+             <string>To end</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QProgressBar" name="FileDigestProgress">
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+            <property name="textVisible">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="FileWorkDirPanel">
+          <item>
+           <widget class="QLabel" name="FileWorkDirL">
+            <property name="text">
+             <string>Base directory:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="FileWorkDirT"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileWorkDirB">
+            <property name="text">
+             <string>Browse directory</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDirAbsRel">
+            <property name="text">
+             <string>Abs -&gt; Rel</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="FileDirRelAbs">
+            <property name="text">
+             <string>Rel -&gt; Abs</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>ToolTab</tabstop>
+  <tabstop>ProjectNew</tabstop>
+  <tabstop>ProjectLoad</tabstop>
+  <tabstop>ProjectSave</tabstop>
+  <tabstop>ProjectSaveAs</tabstop>
+  <tabstop>PacketTable</tabstop>
+  <tabstop>DataPacketN</tabstop>
+  <tabstop>PacketGetSizes</tabstop>
+  <tabstop>PacketStatus</tabstop>
+  <tabstop>PacketFileEdit</tabstop>
+  <tabstop>PacketFile</tabstop>
+  <tabstop>PacketFileBrowse</tabstop>
+  <tabstop>PacketDir</tabstop>
+  <tabstop>PacketDirBrowse</tabstop>
+  <tabstop>ScenarioGenerate</tabstop>
+  <tabstop>ScenarioSetWaiting</tabstop>
+  <tabstop>ScenarioSetDone</tabstop>
+  <tabstop>ScenarioSetPostponed</tabstop>
+  <tabstop>ScenarioPerform</tabstop>
+  <tabstop>Range1T</tabstop>
+  <tabstop>Range2T</tabstop>
+  <tabstop>RangeWhole</tabstop>
+  <tabstop>PacketChunkT</tabstop>
+  <tabstop>ScenarioViewerT</tabstop>
+  <tabstop>IntegrityRangeList</tabstop>
+  <tabstop>IntegrityRangeAdd</tabstop>
+  <tabstop>IntegrityRangeRem</tabstop>
+  <tabstop>IntegrityRangeRemAll</tabstop>
+  <tabstop>IntegrityMode</tabstop>
+  <tabstop>IntegrityScenarioGen</tabstop>
+  <tabstop>IntegrityScenarioSetWaiting</tabstop>
+  <tabstop>IntegrityScenarioSetDone</tabstop>
+  <tabstop>IntegrityScenarioSetPostponed</tabstop>
+  <tabstop>IntegrityScenarioPerform</tabstop>
+  <tabstop>IntegrityScenarioView</tabstop>
+  <tabstop>IntegrityTempFileT</tabstop>
+  <tabstop>IntegrityTempFileBrowse</tabstop>
+  <tabstop>IntegrityChunkSizeT</tabstop>
+  <tabstop>IndexClear</tabstop>
+  <tabstop>IndexLoad</tabstop>
+  <tabstop>IndexSave</tabstop>
+  <tabstop>IndexSaveAs</tabstop>
+  <tabstop>FileIndexSize</tabstop>
+  <tabstop>FileIndexTable</tabstop>
+  <tabstop>FilePacketAdd</tabstop>
+  <tabstop>FilePacketBlank</tabstop>
+  <tabstop>FilePacketRem</tabstop>
+  <tabstop>FilePacketMoveUp</tabstop>
+  <tabstop>FilePacketMoveDown</tabstop>
+  <tabstop>FileDigestCalc</tabstop>
+  <tabstop>FileDigestCalcAll</tabstop>
+  <tabstop>FileDigestCheck</tabstop>
+  <tabstop>FileDigestCheckAll</tabstop>
+  <tabstop>FileDigestSet</tabstop>
+  <tabstop>FileDigestSize</tabstop>
+  <tabstop>FileDigestClearInfo</tabstop>
+  <tabstop>FileOffsetBegin</tabstop>
+  <tabstop>FileOffsetEnd</tabstop>
+  <tabstop>FileWorkDirT</tabstop>
+  <tabstop>FileWorkDirB</tabstop>
+  <tabstop>FileDirAbsRel</tabstop>
+  <tabstop>FileDirRelAbs</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
