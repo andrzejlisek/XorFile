@@ -98,6 +98,8 @@ private slots:
 
     void on_ProjectSaveAs_clicked();
 
+    void on_FileSizeCheckAll_clicked();
+
 private:
     QString ProjectFileName = "";
     Ui::MainWindow *ui;

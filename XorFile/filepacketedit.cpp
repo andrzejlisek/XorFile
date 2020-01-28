@@ -13,11 +13,18 @@ FilePacketEdit::~FilePacketEdit()
 ///
 /// \brief FilePacketEdit::ClearInfo - Clear the status information of all items
 ///
-void FilePacketEdit::ClearInfo()
+void FilePacketEdit::ClearInfo(int N)
 {
-    for (uint I = 0; I < IdxFileInfo.size(); I++)
+    if (N >= 0)
     {
-        IdxFileInfo[I] = "";
+        IdxFileInfo[N] = "";
+    }
+    else
+    {
+        for (uint I = 0; I < IdxFileInfo.size(); I++)
+        {
+            IdxFileInfo[I] = "";
+        }
     }
 }
 
@@ -141,7 +148,16 @@ int FilePacketEdit::ItemDigestCompute(int N, bool Batch)
         DigestWorkingAll = 0;
     }
     DigestWorking = true;
-
+    IdxFileDigest[N] = "X";
+    if (IdxFileName[N] == "")
+    {
+        if (Batch)
+        {
+            DigestWorking = false;
+        }
+        IdxFileInfo[N] = "No file";
+        return 1;
+    }
     try
     {
         IdxFileInfo[N] = "Working";
@@ -156,7 +172,15 @@ int FilePacketEdit::ItemDigestCompute(int N, bool Batch)
             IdxFileInfo[N] = "ERROR: File not found or file open error";
             return 1;
         }
-        IdxFileSize[N] = Eden::FileSize(FileName);
+        if (IdxFileSize[N] != Eden::FileSize(FileName))
+        {
+            if (Batch)
+            {
+                DigestWorking = false;
+            }
+            IdxFileInfo[N] = "ERROR: File size mismatch - real file size: " + to_string(Eden::FileSize(FileName));
+            return 1;
+        }
         CalcOffset();
         thread Thr(&FilePacketEdit::ItemDigestComputeWork, this, N, FileName);
         Thr.detach();
@@ -165,7 +189,10 @@ int FilePacketEdit::ItemDigestCompute(int N, bool Batch)
     }
     catch (...)
     {
-        DigestWorking = false;
+        if (Batch)
+        {
+            DigestWorking = false;
+        }
         IdxFileInfo[N] = "ERROR: File not found or file open error";
         return 1;
     }
@@ -203,11 +230,16 @@ void FilePacketEdit::ItemDigestComputeWork(int N, string FileName)
 ///
 /// \brief FilePacketEdit::ItemDigestCheck - Check the digest
 ///
-int FilePacketEdit::ItemDigestCheck(int N, bool Batch)
+int FilePacketEdit::ItemDigestCheck(int N, bool Batch, bool CheckDigest)
 {
     if (!Batch)
     {
         DigestWorkingAll = 0;
+    }
+    if (IdxFileName[N] == "")
+    {
+        IdxFileInfo[N] = "No file";
+        return 1;
     }
     try
     {
@@ -221,19 +253,26 @@ int FilePacketEdit::ItemDigestCheck(int N, bool Batch)
         }
         if (Eden::FileSize(FileName) != IdxFileSize[N])
         {
-            IdxFileInfo[N] = "FAIL: File size is not consistent with definition";
+            IdxFileInfo[N] = "FAIL: File size mismatch - real file size: " + to_string(Eden::FileSize(FileName));
             return 2;
         }
 
-        if ((IdxFileDigest[N] == "X") || (IdxFileDigest[N] == ""))
+        if (CheckDigest)
         {
-            IdxFileInfo[N] = "FAIL: File size is consistent, but digest is not defined";
+            if ((IdxFileDigest[N] == "X") || (IdxFileDigest[N] == ""))
+            {
+                IdxFileInfo[N] = "FAIL: File size match, but digest is not defined";
+                return 4;
+            }
+            DigestWorking = true;
+            thread Thr(&FilePacketEdit::ItemDigestCheckWork, this, N, FileName);
+            Thr.detach();
+        }
+        else
+        {
+            IdxFileInfo[N] = "PASS: File size match";
             return 4;
         }
-
-        DigestWorking = true;
-        thread Thr(&FilePacketEdit::ItemDigestCheckWork, this, N, FileName);
-        Thr.detach();
 
         return 0;
     }
@@ -261,12 +300,12 @@ void FilePacketEdit::ItemDigestCheckWork(int N, string FileName)
         string DigestS = Eden::ToHex(DigestCalc, 16);
         if (DigestS != IdxFileDigest[N])
         {
-            IdxFileInfo[N] = "FAIL: File size is consistent, but file digest is not consistent with definition";
+            IdxFileInfo[N] = "FAIL: File size match, but file digest mismatch with definition";
             DigestResult = 2;
         }
         else
         {
-            IdxFileInfo[N] = "PASS: File size and digest are consistent";
+            IdxFileInfo[N] = "PASS: File size and digest match with definition";
             DigestResult = 3;
         }
     }

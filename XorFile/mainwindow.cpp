@@ -528,17 +528,21 @@ void MainWindow::TimerDigestEvent()
         RefreshIndexList(true);
         if (!FP.DigestWorking)
         {
-            if (FP.BatchCurrent < (FP.FileCount() - 1))
+            if (FP.BatchCurrent < (((int)FP.BatchItemList.size()) - 1))
             {
                 FP.BatchCurrent++;
 
                 if (FP.DigestWorkingAll == 1)
                 {
-                    FP.ItemDigestCompute(FP.BatchCurrent, true);
+                    FP.ItemDigestCompute(FP.BatchItemList[FP.BatchCurrent], true);
                 }
                 if (FP.DigestWorkingAll == 2)
                 {
-                    FP.ItemDigestCheck(FP.BatchCurrent, true);
+                    FP.ItemDigestCheck(FP.BatchItemList[FP.BatchCurrent], true, true);
+                }
+                if (FP.DigestWorkingAll == 3)
+                {
+                    FP.ItemDigestCheck(FP.BatchItemList[FP.BatchCurrent], true, false);
                 }
             }
             else
@@ -598,8 +602,10 @@ void MainWindow::TimerIntegrityEvent()
 void MainWindow::SetInterfaceEnabled(bool Enabled)
 {
     ui->DataPacketN->setReadOnly(!Enabled);
+    ui->ProjectNew->setEnabled(Enabled);
     ui->ProjectLoad->setEnabled(Enabled);
     ui->ProjectSave->setEnabled(Enabled);
+    ui->ProjectSaveAs->setEnabled(Enabled);
     ui->ScenarioPerform->setEnabled(Enabled);
     ui->ScenarioGenerate->setEnabled(Enabled);
     ui->ScenarioSetWaiting->setEnabled(Enabled);
@@ -640,6 +646,7 @@ void MainWindow::SetInterfaceEnabled(bool Enabled)
     ui->FileDigestClearInfo->setEnabled(Enabled);
     ui->FileOffsetBegin->setEnabled(Enabled);
     ui->FileOffsetEnd->setEnabled(Enabled);
+    ui->FileSizeCheckAll->setEnabled(Enabled);
 
     ui->IntegrityRangeAdd->setEnabled(Enabled);
     ui->IntegrityRangeRem->setEnabled(Enabled);
@@ -653,21 +660,6 @@ void MainWindow::SetInterfaceEnabled(bool Enabled)
     ui->IntegrityMode->setEnabled(Enabled);
     ui->IntegrityTempFileT->setReadOnly(!Enabled);
     ui->IntegrityChunkSizeT->setReadOnly(!Enabled);
-}
-
-void MainWindow::on_FileDigestCalc_clicked()
-{
-    FP.DigestWorkingAll = 0;
-    int N = ui->FileIndexTable->currentRow();
-    if ((N >= 0) && (N < ui->FileIndexTable->rowCount()))
-    {
-        int X = FP.ItemDigestCompute(N, false);
-        if (X == 0)
-        {
-            SetInterfaceEnabled(false);
-            TimerDigest.start(1000);
-        }
-    }
 }
 
 void MainWindow::on_FileDigestSet_clicked()
@@ -702,24 +694,43 @@ void MainWindow::on_FileDigestSize_clicked()
     }
 }
 
-void MainWindow::on_FileDigestCheck_clicked()
+void MainWindow::on_FileDigestCalc_clicked()
 {
-    FP.DigestWorkingAll = 0;
     int N = ui->FileIndexTable->currentRow();
     if ((N >= 0) && (N < ui->FileIndexTable->rowCount()))
     {
-        int X = FP.ItemDigestCheck(N, false);
-        if (X == 0)
-        {
-            SetInterfaceEnabled(false);
-            TimerDigest.start(1000);
-        }
+        FP.ClearInfo(N);
         RefreshIndexList(true);
+        FP.BatchItemListCurrent(N);
+        FP.BatchCurrent = -1;
+        SetInterfaceEnabled(false);
+        FP.DigestWorking = false;
+        FP.DigestWorkingAll = 1;
+        TimerDigest.start(1000);
+    }
+}
+
+void MainWindow::on_FileDigestCheck_clicked()
+{
+    int N = ui->FileIndexTable->currentRow();
+    if ((N >= 0) && (N < ui->FileIndexTable->rowCount()))
+    {
+        FP.ClearInfo(N);
+        RefreshIndexList(true);
+        FP.BatchItemListCurrent(N);
+        FP.BatchCurrent = -1;
+        SetInterfaceEnabled(false);
+        FP.DigestWorking = false;
+        FP.DigestWorkingAll = 2;
+        TimerDigest.start(1000);
     }
 }
 
 void MainWindow::on_FileDigestCalcAll_clicked()
 {
+    FP.ClearInfo(-1);
+    RefreshIndexList(true);
+    FP.BatchItemListAll();
     FP.BatchCurrent = -1;
     SetInterfaceEnabled(false);
     FP.DigestWorking = false;
@@ -729,6 +740,9 @@ void MainWindow::on_FileDigestCalcAll_clicked()
 
 void MainWindow::on_FileDigestCheckAll_clicked()
 {
+    FP.ClearInfo(-1);
+    RefreshIndexList(true);
+    FP.BatchItemListAll();
     FP.BatchCurrent = -1;
     SetInterfaceEnabled(false);
     FP.DigestWorking = false;
@@ -736,9 +750,21 @@ void MainWindow::on_FileDigestCheckAll_clicked()
     TimerDigest.start(1000);
 }
 
+void MainWindow::on_FileSizeCheckAll_clicked()
+{
+    FP.ClearInfo(-1);
+    RefreshIndexList(true);
+    FP.BatchItemListAll();
+    FP.BatchCurrent = -1;
+    SetInterfaceEnabled(false);
+    FP.DigestWorking = false;
+    FP.DigestWorkingAll = 3;
+    TimerDigest.start(200);
+}
+
 void MainWindow::on_FileDigestClearInfo_clicked()
 {
-    FP.ClearInfo();
+    FP.ClearInfo(-1);
     RefreshIndexList(true);
 }
 
@@ -818,9 +844,15 @@ void MainWindow::on_PacketFileEdit_clicked()
     int N = ui->PacketTable->currentRow();
     if ((N >= 0) && (N < ui->PacketTable->rowCount()))
     {
-        FP.LoadIndex(Core.GetPacketFile(N));
-        RefreshIndexList(false);
-        ui->ToolTab->setCurrentIndex(3);
+        if (FP.LoadIndex(Core.GetPacketFile(N)))
+        {
+            RefreshIndexList(false);
+            ui->ToolTab->setCurrentIndex(3);
+        }
+        else
+        {
+            ShowMessage("File \"" + Core.GetPacketFile(N) + "\" is not accessible", "Load to index editor");
+        }
     }
 }
 
@@ -867,6 +899,7 @@ void MainWindow::RefreshIntegrityRangeList(bool UpdateText)
 
 void MainWindow::RefreshIntegrityScenario(bool UpdateText)
 {
+    ui->IntegrityTempSizeT->setText(Eden::ToQStr(Core.IntegrityPerformWaiting(true)));
     if (UpdateText)
     {
         for (int I = 0; I < ui->IntegrityScenarioView->rowCount(); I++)
@@ -902,11 +935,24 @@ void MainWindow::on_IntegrityRangeAdd_clicked()
             S = "";
         }
     }
+    if (S == "0")
+    {
+        ShowMessage("Select any item in Define bunch tab with non-zero size", "Add stripes");
+        return;
+    }
 
     llong XBegin_ = Eden::ToLLong(InputBox("First byte of range", "Add new range", "0"));
     llong XEnd___ = Eden::ToLLong(InputBox("Last byte of range", "Add new range", S));
+    if (XBegin_ > XEnd___)
+    {
+        return;
+    }
 
     llong XNumber = Eden::ToLLong(InputBox("Stripe distance (positive) or number of stripes (negative)", "Add new range", "-1"));
+    if (XNumber == 0)
+    {
+        return;
+    }
 
     // Calculating the stripe size when the provided stripe size is negative, which means the stripe quantity.
     if (XNumber < 0)
@@ -916,8 +962,7 @@ void MainWindow::on_IntegrityRangeAdd_clicked()
     S = to_string(XNumber);
 
     llong XSize__ = Eden::ToLLong(InputBox("Stripe size", "Add new range", S));
-
-    if ((XNumber <= 0) || (XSize__ <= 0) || (XBegin_ > XEnd___))
+    if (XSize__ <= 0)
     {
         return;
     }
@@ -938,6 +983,7 @@ void MainWindow::on_IntegrityRangeAdd_clicked()
     }
 
     llong II = XBegin_;
+
     while (II <= XEnd___)
     {
         llong T1 = II + XOffset;
@@ -1015,7 +1061,7 @@ void MainWindow::on_IntegrityScenarioPerform_clicked()
     Core.IntegrityPacketChunkSize = 1024 * 1024 * Eden::ToLLong(Eden::ToStr(ui->IntegrityChunkSizeT->text()));
     if (Core.IntegrityPacketChunkSize > 0)
     {
-        string Msg = Core.IntegrityPerformWaiting();
+        string Msg = Core.IntegrityPerformWaiting(false);
         if (Msg == "")
         {
             SetInterfaceEnabled(false);
@@ -1036,3 +1082,4 @@ void MainWindow::on_IntegrityTempFileT_textChanged(const QString &arg1)
 {
     Core.IntegrityTempFileName = Eden::ToStr(arg1);
 }
+

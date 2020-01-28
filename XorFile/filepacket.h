@@ -7,6 +7,7 @@
 #include <climits>
 #include <fstream>
 #include <iostream>
+#include "configfile.h"
 class FilePacket
 {
 public:
@@ -37,6 +38,10 @@ public:
     int FileCount();
     void CalcOffset();
     void CalcRange(llong Range1, llong Range2);
+
+    vector<int> BatchItemList;
+    void BatchItemListCurrent(int I);
+    void BatchItemListAll();
 
 protected:
     bool ValidFileName(string FN);

@@ -12,6 +12,9 @@
 #include "filepacket.h"
 #include "filepacketedit.h"
 #include <thread>
+#include "configfile.h"
+
+#define PacketToText(X) (((X) >= 0) ? (((X) < 10) ? ("D0" + to_string(X)) : ("D" + to_string(X))) : (((X) == -1) ? "P" : (((X) == -2) ? "Q" : "?")))
 
 using namespace std;
 class AppCore
@@ -43,7 +46,7 @@ public:
     void ActionPerformWaitingWork();
     bool ActionPerform(uint N);
 
-    string IntegrityPerformWaiting();
+    string IntegrityPerformWaiting(bool GetSize);
     void IntegrityPerformWaitingWork();
     bool IntegrityPerform(uint N);
 

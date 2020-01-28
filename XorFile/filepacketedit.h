@@ -15,7 +15,7 @@ public:
     llong ItemGetSize(int N);
     int ItemSetDigest(int N, string Digest);
     string ItemGetDigest(int N);
-    void ClearInfo();
+    void ClearInfo(int N);
 
 
     bool DigestWorking;
@@ -27,7 +27,7 @@ public:
 
     int ItemDigestCompute(int N, bool Batch);
     void ItemDigestComputeWork(int N, string FileName);
-    int ItemDigestCheck(int N, bool Batch);
+    int ItemDigestCheck(int N, bool Batch, bool CheckDigest);
     void ItemDigestCheckWork(int N, string FileName);
 
     void ItemDirAbsRel(int N);

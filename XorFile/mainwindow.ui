@@ -479,7 +479,12 @@
                 </item>
                 <item>
                  <property name="text">
-                  <string>P and Q</string>
+                  <string>P and Q seq</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>P and Q sim</string>
                  </property>
                 </item>
                </widget>
@@ -516,6 +521,24 @@
                <widget class="QPushButton" name="IntegrityScenarioPerform">
                 <property name="text">
                  <string>Perform waiting</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QLabel" name="IntegrityTempSizeL">
+                <property name="text">
+                 <string>Temporary file size:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="IntegrityTempSizeT">
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -608,14 +631,14 @@
           <item>
            <widget class="QPushButton" name="IndexClear">
             <property name="text">
-             <string>Clear</string>
+             <string>New</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="IndexLoad">
             <property name="text">
-             <string>Load</string>
+             <string>Open</string>
             </property>
            </widget>
           </item>
@@ -754,7 +777,7 @@
           <item>
            <widget class="QPushButton" name="FileDigestCalc">
             <property name="text">
-             <string>Get digest - selected</string>
+             <string>Get digest - sel</string>
             </property>
            </widget>
           </item>
@@ -766,9 +789,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="FileSizeCheckAll">
+            <property name="text">
+             <string>Test sizes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="FileDigestCheck">
             <property name="text">
-             <string>Test digest - selected</string>
+             <string>Test digest - sel</string>
             </property>
            </widget>
           </item>

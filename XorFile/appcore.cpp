@@ -154,7 +154,7 @@ void AppCore::GenerateScenarioRecoverD(int DataNum, int Recalc, int Reduce)
 
 
 
-    ActionList.push_back(XorAction(0, "Recover D" + to_string(Recalc) + " using P, Q and all remaining D excepting D" + to_string(Reduce), 0, 0, 0, Recalc));
+    ActionList.push_back(XorAction(0, "Recover " + PacketToText(Recalc) + " using P, Q and all remaining Dxx excepting " + PacketToText(Reduce), 0, 0, 0, Recalc));
     ActionList.push_back(XorAction(1, "", -1, Reduce, 0, Recalc));
     ActionList.push_back(XorAction(2, "", -2, 0, 0, Recalc));
 
@@ -273,7 +273,7 @@ int AppCore::GenerateScenario()
         {
             if (ExistsP)
             {
-                ActionList.push_back(XorAction(0, "Recover D" + to_string(Missing1) + " using P and all remaining D", 0, 0, 0, Missing1));
+                ActionList.push_back(XorAction(0, "Recover " + PacketToText(Missing1) + " using P and all remaining Dxx", 0, 0, 0, Missing1));
                 ActionList.push_back(XorAction(1, "", -1, 0, 0, Missing1));
                 for (I = 0; I < DataN; I++)
                 {
@@ -288,7 +288,7 @@ int AppCore::GenerateScenario()
         {
             if (ExistsQ)
             {
-                ActionList.push_back(XorAction(0, "Recover D" + to_string(Missing1) + " using Q and all remaining D", 0, 0, 0, Missing1));
+                ActionList.push_back(XorAction(0, "Recover " + PacketToText(Missing1) + " using Q and all remaining Dxx", 0, 0, 0, Missing1));
                 ActionList.push_back(XorAction(1, "", -2, 0, 0, Missing1));
                 for (I = 0; I < DataN; I++)
                 {
@@ -336,7 +336,7 @@ int AppCore::GenerateScenario()
         {
             if ((StatusD[I] == 2))
             {
-                ActionList.push_back(XorAction(0, "Add or remove D" + to_string(I), 0, 0, 0, I));
+                ActionList.push_back(XorAction(0, "Add or remove " + PacketToText(I), 0, 0, 0, I));
                 if (ExistsP)
                 {
                     ActionList.push_back(XorAction(2, "" + to_string(I), I, 0, 0, -1));
@@ -384,9 +384,9 @@ string AppCore::GetPacketText(int N, bool OnlySize)
     N = GetPacketNum(N);
     stringstream SS;
     llong PacketSize = -3;
+    SS << PacketToText(N) << "\t";
     if (N >= 0)
     {
-        SS << "D" << N << "\t";
         if ((FileD[N].compare("") != 0))
         {
             switch (StatusD[N])
@@ -406,7 +406,6 @@ string AppCore::GetPacketText(int N, bool OnlySize)
     }
     if (N == (-1))
     {
-        SS << "P\t";
         if ((FileP.compare("") != 0))
         {
             switch (StatusP)
@@ -426,7 +425,6 @@ string AppCore::GetPacketText(int N, bool OnlySize)
     }
     if (N == (-2))
     {
-        SS << "Q\t";
         if ((FileQ.compare("") != 0))
         {
             switch (StatusQ)
@@ -697,67 +695,64 @@ void AppCore::ProjectNew()
     IntegrityTempFileName = "";
 }
 
+
 ///
 /// \brief AppCore::ProjectLoad - Loading bunch file
 /// \param FileName
 ///
 void AppCore::ProjectLoad(string FileName)
 {
-    uint BufI = 0;
+    //ProjectLoad_old(FileName);
+
+    EdenClass::ConfigFile CF;
+    CF.FileLoad(FileName);
     int I;
-    vector <string> Buf = Eden::TextListFileLoad(FileName);
 
     // Quantity of data packets
-    DataN = Eden::ToInt(Buf[BufI]);
-    BufI++;
+    DataN = CF.ParamGetI("Data");
 
     // Data packets
     for (I = 0; I < DataN; I++)
     {
-        StatusD[I] = Eden::ToInt(Buf[BufI]);
-        BufI++;
-        FileD[I] = Buf[BufI];
-        BufI++;
-        DirD[I] = Buf[BufI];
-        BufI++;
+        StatusD[I] = CF.ParamGetI("Data" + to_string(I) + "Status");
+        FileD[I] = CF.ParamGetS("Data" + to_string(I) + "File");
+        DirD[I] = CF.ParamGetS("Data" + to_string(I) + "Dir");
         SizeD[I] = -3;
     }
 
     // P and Q packets
-    StatusP = Eden::ToInt(Buf[BufI]);
-    BufI++;
-    FileP = Buf[BufI];
-    BufI++;
-    DirP = Buf[BufI];
-    BufI++;
+    StatusP = CF.ParamGetI("ParityPStatus");
+    FileP = CF.ParamGetS("ParityPFile");
+    DirP = CF.ParamGetS("ParityPDir");
     SizeP = -3;
-    StatusQ = Eden::ToInt(Buf[BufI]);
-    BufI++;
-    FileQ = Buf[BufI];
-    BufI++;
-    DirQ = Buf[BufI];
-    BufI++;
+    StatusQ = CF.ParamGetI("ParityQStatus");
+    FileQ = CF.ParamGetS("ParityQFile");
+    DirQ = CF.ParamGetS("ParityQDir");
     SizeQ = -3;
 
     // Clearing action list
     ActionList.clear();
 
     // Quantity of actions
-    int TempN = Eden::ToInt(Buf[BufI]);
-    BufI++;
+    int TempN = CF.ParamGetI("Action");
 
     // Action list
     for (I = 0; I < TempN; I++)
     {
         ActionList.push_back(XorAction(0, "", 0, 0, 0, 0));
-        ActionList.at(I).TextDataLoad(Buf, BufI);
+        ActionList[I].ActionType = CF.ParamGetI("Action" + to_string(I) + "Type");
+        ActionList[I].ActionStatus = CF.ParamGetI("Action" + to_string(I) + "Status");
+        ActionList[I].ParamA = CF.ParamGetI("Action" + to_string(I) + "ParamA");
+        ActionList[I].ParamB = CF.ParamGetI("Action" + to_string(I) + "ParamB");
+        ActionList[I].ParamD = CF.ParamGetI("Action" + to_string(I) + "ParamD");
+        ActionList[I].OutData = CF.ParamGetI("Action" + to_string(I) + "OutData");
+        ActionList[I].LabelText = CF.ParamGetS("Action" + to_string(I) + "LabelText");
+        ActionList[I].TextDataSet();
     }
 
     // Data range
-    WorkRange1 = Eden::ToLLong(Buf[BufI]);
-    BufI++;
-    WorkRange2 = Eden::ToLLong(Buf[BufI]);
-    BufI++;
+    WorkRange1 = CF.ParamGetL("WorkRange1");
+    WorkRange2 = CF.ParamGetL("WorkRange2");
 
     // Clearing the integrity test
     IntegrityRangeBegin.clear();
@@ -766,43 +761,33 @@ void AppCore::ProjectLoad(string FileName)
     IntegrityRangeStatusQ.clear();
     IntegrityActionStatus.clear();
     IntegrityActionType.clear();
-    if (BufI < Buf.size())
+
+    // Temporary file name
+    IntegrityTempFileName = CF.ParamGetS("IntegrityTempFileName");
+
+    // Quantity of test data stripes
+    TempN = CF.ParamGetI("IntegrityRange");
+
+    // Test data stripes
+    for (I = 0; I < TempN; I++)
     {
-        // Temporary file name
-        IntegrityTempFileName = Buf[BufI];
-        BufI++;
+        IntegrityRangeBegin.push_back(CF.ParamGetL("IntegrityRange" + to_string(I) + "Begin"));
+        IntegrityRangeEnd.push_back(CF.ParamGetL("IntegrityRange" + to_string(I) + "End"));
+        IntegrityRangeStatusP.push_back(CF.ParamGetI("IntegrityRange" + to_string(I) + "StatusP"));
+        IntegrityRangeStatusQ.push_back(CF.ParamGetI("IntegrityRange" + to_string(I) + "StatusQ"));
+    }
 
-        // Quantity of test data stripes
-        TempN = Eden::ToInt(Buf[BufI]);
-        BufI++;
+    // Quantity of test actions
+    TempN = CF.ParamGetI("IntegrityAction");
 
-        // Test data stripes
-        for (I = 0; I < TempN; I++)
-        {
-            IntegrityRangeBegin.push_back(Eden::ToLLong(Buf[BufI]));
-            BufI++;
-            IntegrityRangeEnd.push_back(Eden::ToLLong(Buf[BufI]));
-            BufI++;
-            IntegrityRangeStatusP.push_back(Eden::ToInt(Buf[BufI]));
-            BufI++;
-            IntegrityRangeStatusQ.push_back(Eden::ToInt(Buf[BufI]));
-            BufI++;
-        }
-
-        // Quantity of test actions
-        TempN = Eden::ToInt(Buf[BufI]);
-        BufI++;
-
-        // Test action list
-        for (I = 0; I < TempN; I++)
-        {
-            IntegrityActionStatus.push_back(Eden::ToInt(Buf[BufI]));
-            BufI++;
-            IntegrityActionType.push_back(Eden::ToInt(Buf[BufI]));
-            BufI++;
-        }
+    // Test action list
+    for (I = 0; I < TempN; I++)
+    {
+        IntegrityActionStatus.push_back(CF.ParamGetI("IntegrityAction" + to_string(I) + "Status"));
+        IntegrityActionType.push_back(CF.ParamGetI("IntegrityAction" + to_string(I) + "Type"));
     }
 }
+
 
 ///
 /// \brief AppCore::ProjectSave - Saving the bunch
@@ -810,71 +795,78 @@ void AppCore::ProjectLoad(string FileName)
 ///
 void AppCore::ProjectSave(string FileName)
 {
-    int I;
-    vector<XorAction>::iterator XI;
-    vector<string> Buf;
+    //ProjectSave_old(FileName);
 
+    EdenClass::ConfigFile CF;
+    int I;
 
     // Quantity of data packets
-    Buf.push_back(to_string(DataN));
+    CF.ParamSet("Data", DataN);
 
     // Data packets
     for (I = 0; I < DataN; I++)
     {
-        Buf.push_back(to_string(StatusD[I]));
-        Buf.push_back(FileD[I]);
-        Buf.push_back(DirD[I]);
+        CF.ParamSet("Data" + to_string(I) + "Status", StatusD[I]);
+        CF.ParamSet("Data" + to_string(I) + "File", FileD[I]);
+        CF.ParamSet("Data" + to_string(I) + "Dir", DirD[I]);
     }
 
     // P and Q packets
-    Buf.push_back(to_string(StatusP));
-    Buf.push_back(FileP);
-    Buf.push_back(DirP);
-    Buf.push_back(to_string(StatusQ));
-    Buf.push_back(FileQ);
-    Buf.push_back(DirQ);
+    CF.ParamSet("ParityPStatus", StatusP);
+    CF.ParamSet("ParityPFile", FileP);
+    CF.ParamSet("ParityPDir", DirP);
+    CF.ParamSet("ParityQStatus", StatusQ);
+    CF.ParamSet("ParityQFile", FileQ);
+    CF.ParamSet("ParityQDir", DirQ);
 
     // Quantity of actions
-    Buf.push_back(to_string(ActionList.size()));
+    DataN = ActionList.size();
+    CF.ParamSet("Action", DataN);
 
     // Action list
-    for (XI = ActionList.begin(); XI != ActionList.end(); XI++)
+    for (I = 0; I < DataN; I++)
     {
-        (*XI).TextDataSave(Buf);
+        CF.ParamSet("Action" + to_string(I) + "Type", ActionList[I].ActionType);
+        CF.ParamSet("Action" + to_string(I) + "Status", ActionList[I].ActionStatus);
+        CF.ParamSet("Action" + to_string(I) + "ParamA", ActionList[I].ParamA);
+        CF.ParamSet("Action" + to_string(I) + "ParamB", ActionList[I].ParamB);
+        CF.ParamSet("Action" + to_string(I) + "ParamD", ActionList[I].ParamD);
+        CF.ParamSet("Action" + to_string(I) + "OutData", ActionList[I].OutData);
+        CF.ParamSet("Action" + to_string(I) + "LabelText", ActionList[I].LabelText);
     }
 
     // Data range
-    Buf.push_back(to_string(WorkRange1));
-    Buf.push_back(to_string(WorkRange2));
+    CF.ParamSet("WorkRange1", WorkRange1);
+    CF.ParamSet("WorkRange2", WorkRange2);
 
     // Temporary file name
-    Buf.push_back(IntegrityTempFileName);
+    CF.ParamSet("IntegrityTempFileName", IntegrityTempFileName);
 
     // Quantity of test data stripes
     int TempN = IntegrityRangeBegin.size();
-    Buf.push_back(to_string(TempN));
+    CF.ParamSet("IntegrityRange", TempN);
 
     // Test data stripes
     for (I = 0; I < TempN; I++)
     {
-        Buf.push_back(to_string(IntegrityRangeBegin[I]));
-        Buf.push_back(to_string(IntegrityRangeEnd[I]));
-        Buf.push_back(to_string(IntegrityRangeStatusP[I]));
-        Buf.push_back(to_string(IntegrityRangeStatusQ[I]));
+        CF.ParamSet("IntegrityRange" + to_string(I) + "Begin", IntegrityRangeBegin[I]);
+        CF.ParamSet("IntegrityRange" + to_string(I) + "End", IntegrityRangeEnd[I]);
+        CF.ParamSet("IntegrityRange" + to_string(I) + "StatusP", IntegrityRangeStatusP[I]);
+        CF.ParamSet("IntegrityRange" + to_string(I) + "StatusQ", IntegrityRangeStatusQ[I]);
     }
 
     // Quantity of test actions
     TempN = IntegrityActionStatus.size();
 
     // Test action list
-    Buf.push_back(to_string(TempN));
+    CF.ParamSet("IntegrityAction", TempN);
     for (I = 0; I < TempN; I++)
     {
-        Buf.push_back(to_string(IntegrityActionStatus[I]));
-        Buf.push_back(to_string(IntegrityActionType[I]));
+        CF.ParamSet("IntegrityAction" + to_string(I) + "Status", IntegrityActionStatus[I]);
+        CF.ParamSet("IntegrityAction" + to_string(I) + "Type", IntegrityActionType[I]);
     }
 
-    Eden::TextListFileSave(FileName, Buf);
+    CF.FileSave(FileName);
 }
 
 ///
@@ -1375,7 +1367,7 @@ void AppCore::IntegrityActionGenerate(int Mode)
             IntegrityActionStatus.push_back(0);
             IntegrityActionType.push_back(b11000101);
             break;
-        case 2: // P and Q
+        case 2: // P and Q sequentially
             IntegrityActionStatus.push_back(0);
             IntegrityActionType.push_back(b11000000);
             for (int I = 0; I < DataN; I++)
@@ -1394,6 +1386,19 @@ void AppCore::IntegrityActionGenerate(int Mode)
             }
             IntegrityActionStatus.push_back(0);
             IntegrityActionType.push_back(b11000101);
+            break;
+        case 3: // P and Q simultaneously
+            IntegrityActionStatus.push_back(0);
+            IntegrityActionType.push_back(b11000010);
+            for (int I = 0; I < DataN; I++)
+            {
+                IntegrityActionStatus.push_back(0);
+                IntegrityActionType.push_back(I | b01000000);
+            }
+            IntegrityActionStatus.push_back(0);
+            IntegrityActionType.push_back(b11000001);
+            IntegrityActionStatus.push_back(0);
+            IntegrityActionType.push_back(b11000100);
             break;
     }
 
@@ -1437,7 +1442,7 @@ string AppCore::IntegrityActionText(int N)
             }
             else
             {
-                X += "Read D" + to_string(IntegrityActionType[N] & b00011111) + " for P";
+                X += "Read " + PacketToText(IntegrityActionType[N] & b00011111) + " for P";
             }
             break;
         case b10000000:
@@ -1447,17 +1452,30 @@ string AppCore::IntegrityActionText(int N)
             }
             else
             {
-                X += "Read D" + to_string(IntegrityActionType[N] & b00011111) + " for Q";
+                X += "Read " + PacketToText(IntegrityActionType[N] & b00011111) + " for Q";
+            }
+            break;
+        case b01000000:
+            if ((IntegrityActionType[N] & b00011111) == b00011111)
+            {
+                X += "Read ?";
+            }
+            else
+            {
+                X += "Read " + PacketToText(IntegrityActionType[N] & b00011111) + " for P and Q";
             }
             break;
         case b11000000:
             switch (IntegrityActionType[N] & b00011111)
             {
                 case b00000000: X += "Create blank file"; break;
+                case b00000010: X += "Create blank file"; break;
                 case b00000001: X += "Check file - P"; break;
                 case b00000101: X += "Check file - Q"; break;
+                case b00000100: X += "Check file - Q"; break;
                 case b00000111: X += "Reset test status, create temporary file"; break;
                 case b00000110: X += "Remove temporary file"; break;
+                case b00000011: X += "XXX"; break;
             }
             break;
     }
@@ -1480,8 +1498,10 @@ void AppCore::IntegrityActionSetStatus(int N, int S)
 }
 
 
-string AppCore::IntegrityPerformWaiting()
+string AppCore::IntegrityPerformWaiting(bool GetSize)
 {
+    IntegrityRangeAllSize = 0;
+
     // Checking if the stripes are defined
     if (IntegrityRangeStatusP.size() == 0)
     {
@@ -1515,10 +1535,28 @@ string AppCore::IntegrityPerformWaiting()
     }
     IntegrityRangeAllSize = WorkOffset;
 
-    // Performing the integrity test
-    IntegrityWorking = 99999999;
-    thread Thr(&AppCore::IntegrityPerformWaitingWork, this);
-    Thr.detach();
+    if (GetSize)
+    {
+        for (uint I = 0; I < IntegrityActionType.size(); I++)
+        {
+            if (IntegrityActionType[I] == b11000000)
+            {
+                return to_string(IntegrityRangeAllSize);
+            }
+            if (IntegrityActionType[I] == b11000010)
+            {
+                return to_string(IntegrityRangeAllSize * 2);
+            }
+        }
+        return to_string(0);
+    }
+    else
+    {
+        // Performing the integrity test
+        IntegrityWorking = 99999999;
+        thread Thr(&AppCore::IntegrityPerformWaitingWork, this);
+        Thr.detach();
+    }
     return "";
 }
 
@@ -1565,86 +1603,95 @@ bool AppCore::IntegrityPerform(uint N)
     FileBuffer.resize(IntegrityPacketChunkSize);
     fill(FileBuffer.begin(), FileBuffer.end(), 0);
 
-    // The action is performed for every stripe
-    for (uint RangeI = 0; RangeI < IntegrityRangeStatusP.size(); RangeI++)
+    // Creating temporary file is not a iteration by file stripes
+    if ((IntegrityActionType[N] == b11000000) || (IntegrityActionType[N] == b11000010))
     {
-        // Encounting packet quantity
-        PacketChunkCount = IntegrityRangeWorkChunks[RangeI];
         PacketChunkSize = IntegrityPacketChunkSize;
+        PacketChunkCount = (IntegrityRangeAllSize / IntegrityPacketChunkSize) + 1;
+        PacketChunkO = 0;
 
-        // Performing the action
-        switch (IntegrityActionType[N] & b11100000)
+        fstream F(IntegrityTempFileName, ios::binary | ios::out | ios::in);
+        if (F.is_open())
         {
-            case b00000000:
-            case b10000000:
-                {
-                    // Reading file contents to insert this in the temporary file
-                    FilePacket PacketWork;
-                    int FX = (IntegrityActionType[N] & b00011111);
-                    int ReadMangle = ((IntegrityActionType[N] & b11100000) == b10000000) ? FX : 0;
-                    if (PacketWork.LoadIndex(GetPacketFile(FX)))
+            switch (IntegrityActionType[N])
+            {
+                case b11000000:
+                    // Creating the blank file with the same size as sum of stripes
+                    for (PacketChunkI = PacketChunkCount; PacketChunkI > 0; PacketChunkI--)
                     {
-                        PacketWork.WorkDir = GetPacketDir(FX);
-
-                        if (PacketWork.GetSize(0) <= IntegrityRangeEnd[RangeI])
+                        if (PacketChunkI == 1)
                         {
-                            //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " is too small.";
-                            Good = false;
+                            PacketChunkSize = IntegrityRangeAllSize - PacketChunkO;
                         }
-                    }
-                    else
-                    {
-                        //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " cannot be open.";
-                        Good = false;
-                    }
-
-                    if (Good)
-                    {
-                        fstream F(IntegrityTempFileName, ios::binary | ios::out | ios::in);
-                        if (F.is_open())
-                        {
-                            llong PacketWorkPos = IntegrityRangeWorkOffset[RangeI];
-
-                            PacketChunkO = IntegrityRangeBegin[RangeI];
-                            for (PacketChunkI = PacketChunkCount; PacketChunkI > 0; PacketChunkI--)
-                            {
-                                if (PacketChunkI == 1)
-                                {
-                                    PacketChunkSize = IntegrityRangeEnd[RangeI] - PacketChunkO + 1;
-                                }
-
-                                PacketWork.LoadSaveFragment(PacketChunkO, PacketChunkSize, false);
-
-                                F.seekg(PacketWorkPos);
-                                F.read((char*)FileBuffer.data(), PacketChunkSize);
-
-                                for (BufferI = 0; BufferI < PacketChunkSize; BufferI++)
-                                {
-                                    FileBuffer[BufferI] = FileBuffer[BufferI] ^ Mangle[ReadMangle][PacketWork.FileBuffer[BufferI]];
-                                }
-
-                                F.seekp(PacketWorkPos);
-                                F.write((char*)FileBuffer.data(), PacketChunkSize);
-
-                                IntegrityProgressCurrent++;
-                                PacketChunkO += PacketChunkSize;
-                                PacketWorkPos += PacketChunkSize;
-                            }
-                            F.close();
-                        }
+                        F.write((char*)FileBuffer.data(), PacketChunkSize);
+                        IntegrityProgressCurrent++;
+                        PacketChunkO += PacketChunkSize;
                     }
                     break;
-                }
-            case b11000000:
-                switch (IntegrityActionType[N] & b00011111)
-                {
-                    case b00000000:
+
+                case b11000010:
+                    // Creating the blank file with the twice size as sum of stripes
+                    for (PacketChunkI = PacketChunkCount; PacketChunkI > 0; PacketChunkI--)
+                    {
+                        if (PacketChunkI == 1)
                         {
-                            // Creating the blank file with the same size as sum of stripes
+                            PacketChunkSize = IntegrityRangeAllSize - PacketChunkO;
+                        }
+                        F.write((char*)FileBuffer.data(), PacketChunkSize);
+                        F.write((char*)FileBuffer.data(), PacketChunkSize);
+                        IntegrityProgressCurrent++;
+                        PacketChunkO += PacketChunkSize;
+                    }
+                    break;
+            }
+            F.close();
+        }
+    }
+    else
+    {
+        // The action is performed for every stripe
+        for (uint RangeI = 0; RangeI < IntegrityRangeStatusP.size(); RangeI++)
+        {
+            // Encounting packet quantity
+            PacketChunkCount = IntegrityRangeWorkChunks[RangeI];
+            PacketChunkSize = IntegrityPacketChunkSize;
+
+            // Performing the action
+            switch (IntegrityActionType[N] & b11100000)
+            {
+                case b00000000:
+                case b10000000:
+                case b01000000:
+                    {
+                        // Reading file contents to insert this in the temporary file
+                        FilePacket PacketWork;
+                        int FX = (IntegrityActionType[N] & b00011111);
+                        int ReadMangle = (((IntegrityActionType[N] & b11100000) == b10000000) || ((IntegrityActionType[N] & b11100000) == b01000000)) ? FX : 0;
+                        bool PQ = ((IntegrityActionType[N] & b11100000) == b01000000);
+                        if (PacketWork.LoadIndex(GetPacketFile(FX)))
+                        {
+                            PacketWork.WorkDir = GetPacketDir(FX);
+
+                            if (PacketWork.GetSize(0) <= IntegrityRangeEnd[RangeI])
+                            {
+                                //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " is too small.";
+                                Good = false;
+                            }
+                        }
+                        else
+                        {
+                            //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " cannot be open.";
+                            Good = false;
+                        }
+
+                        if (Good)
+                        {
                             fstream F(IntegrityTempFileName, ios::binary | ios::out | ios::in);
                             if (F.is_open())
                             {
-                                F.seekp(IntegrityRangeWorkOffset[RangeI]);
+                                llong PacketWorkPos = IntegrityRangeWorkOffset[RangeI];
+                                llong PacketWorkPos_ = PacketWorkPos + IntegrityRangeAllSize;
+
                                 PacketChunkO = IntegrityRangeBegin[RangeI];
                                 for (PacketChunkI = PacketChunkCount; PacketChunkI > 0; PacketChunkI--)
                                 {
@@ -1652,130 +1699,176 @@ bool AppCore::IntegrityPerform(uint N)
                                     {
                                         PacketChunkSize = IntegrityRangeEnd[RangeI] - PacketChunkO + 1;
                                     }
-                                    F.write((char*)FileBuffer.data(), PacketChunkSize);
+                                    PacketWork.LoadSaveFragment(PacketChunkO, PacketChunkSize, false);
+                                    if (PQ)
+                                    {
+                                        F.seekg(PacketWorkPos);
+                                        F.read((char*)FileBuffer.data(), PacketChunkSize);
+                                        for (BufferI = 0; BufferI < PacketChunkSize; BufferI++)
+                                        {
+                                            FileBuffer[BufferI] = FileBuffer[BufferI] ^ Mangle[0][PacketWork.FileBuffer[BufferI]];
+                                        }
+                                        F.seekp(PacketWorkPos);
+                                        F.write((char*)FileBuffer.data(), PacketChunkSize);
+
+                                        F.seekg(PacketWorkPos_);
+                                        F.read((char*)FileBuffer.data(), PacketChunkSize);
+                                        for (BufferI = 0; BufferI < PacketChunkSize; BufferI++)
+                                        {
+                                            FileBuffer[BufferI] = FileBuffer[BufferI] ^ Mangle[ReadMangle][PacketWork.FileBuffer[BufferI]];
+                                        }
+                                        F.seekp(PacketWorkPos_);
+                                        F.write((char*)FileBuffer.data(), PacketChunkSize);
+                                    }
+                                    else
+                                    {
+                                        F.seekg(PacketWorkPos);
+                                        F.read((char*)FileBuffer.data(), PacketChunkSize);
+                                        for (BufferI = 0; BufferI < PacketChunkSize; BufferI++)
+                                        {
+                                            FileBuffer[BufferI] = FileBuffer[BufferI] ^ Mangle[ReadMangle][PacketWork.FileBuffer[BufferI]];
+                                        }
+                                        F.seekp(PacketWorkPos);
+                                        F.write((char*)FileBuffer.data(), PacketChunkSize);
+                                    }
+
                                     IntegrityProgressCurrent++;
                                     PacketChunkO += PacketChunkSize;
+                                    PacketWorkPos += PacketChunkSize;
+                                    PacketWorkPos_ += PacketChunkSize;
                                 }
-
                                 F.close();
                             }
-                            break;
                         }
-                    case b00000001:
-                    case b00000101:
-                        {
-                            IntegrityWorking = 1000 + RangeI;
-                            // Comparing the temporary file with the P or the Q packet
-                            bool IsQ = (IntegrityActionType[N] & b00011111) == b00000101;
-                            int Passed = 1;
-                            int FX;
-                            if (IsQ)
+                        break;
+                    }
+                case b11000000:
+                    switch (IntegrityActionType[N] & b00011111)
+                    {
+                        case b00000001:
+                        case b00000101:
+                        case b00000100:
                             {
-                                IntegrityRangeStatusQ[RangeI] = 3;
-                                FX = -2;
-                            }
-                            else
-                            {
-                                IntegrityRangeStatusP[RangeI] = 3;
-                                FX = -1;
-                            }
-
-
-                            FilePacket PacketWork;
-                            if (PacketWork.LoadIndex(GetPacketFile(FX)))
-                            {
-                                PacketWork.WorkDir = GetPacketDir(FX);
-
-                                if (PacketWork.GetSize(0) <= IntegrityRangeEnd[RangeI])
+                                IntegrityWorking = 1000 + RangeI;
+                                // Comparing the temporary file with the P or the Q packet
+                                bool IsQ = (((IntegrityActionType[N] & b00011111) == b00000101) || ((IntegrityActionType[N] & b00011111) == b00000100));
+                                int Passed = 1;
+                                int FX;
+                                if (IsQ)
                                 {
-                                    //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " is too small.";
+                                    IntegrityRangeStatusQ[RangeI] = 3;
+                                    FX = -2;
+                                }
+                                else
+                                {
+                                    IntegrityRangeStatusP[RangeI] = 3;
+                                    FX = -1;
+                                }
+
+
+                                FilePacket PacketWork;
+                                if (PacketWork.LoadIndex(GetPacketFile(FX)))
+                                {
+                                    PacketWork.WorkDir = GetPacketDir(FX);
+
+                                    if (PacketWork.GetSize(0) <= IntegrityRangeEnd[RangeI])
+                                    {
+                                        //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " is too small.";
+                                        Good = false;
+                                    }
+                                }
+                                else
+                                {
+                                    //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " cannot be open.";
                                     Good = false;
                                 }
-                            }
-                            else
-                            {
-                                //ActionList[N].MSG = "ERROR: Packet " + ActionList[N].InVarName + " cannot be open.";
-                                Good = false;
-                            }
 
 
-                            if (Good)
-                            {
-                                fstream F(IntegrityTempFileName, ios::binary | ios::in);
-                                if (F.is_open())
+                                if (Good)
                                 {
-                                    F.seekg(IntegrityRangeWorkOffset[RangeI]);
-
-                                    PacketChunkO = IntegrityRangeBegin[RangeI];
-                                    for (PacketChunkI = PacketChunkCount; PacketChunkI > 0; PacketChunkI--)
+                                    fstream F(IntegrityTempFileName, ios::binary | ios::in);
+                                    if (F.is_open())
                                     {
-                                        if (PacketChunkI == 1)
+                                        if (((IntegrityActionType[N] & b00011111) == b00000100))
                                         {
-                                            PacketChunkSize = IntegrityRangeEnd[RangeI] - PacketChunkO + 1;
+                                            F.seekg(IntegrityRangeWorkOffset[RangeI] + IntegrityRangeAllSize);
                                         }
-                                        if (Passed == 1)
+                                        else
                                         {
-                                            PacketWork.LoadSaveFragment(PacketChunkO, PacketChunkSize, false);
-                                            F.read((char*)FileBuffer.data(), PacketChunkSize);
-                                            for (BufferI = 0; BufferI < PacketChunkSize; BufferI++)
+                                            F.seekg(IntegrityRangeWorkOffset[RangeI]);
+                                        }
+
+                                        PacketChunkO = IntegrityRangeBegin[RangeI];
+                                        for (PacketChunkI = PacketChunkCount; PacketChunkI > 0; PacketChunkI--)
+                                        {
+                                            if (PacketChunkI == 1)
                                             {
-                                                if (FileBuffer[BufferI] != PacketWork.FileBuffer[BufferI])
+                                                PacketChunkSize = IntegrityRangeEnd[RangeI] - PacketChunkO + 1;
+                                            }
+                                            if (Passed == 1)
+                                            {
+                                                PacketWork.LoadSaveFragment(PacketChunkO, PacketChunkSize, false);
+                                                F.read((char*)FileBuffer.data(), PacketChunkSize);
+                                                for (BufferI = 0; BufferI < PacketChunkSize; BufferI++)
                                                 {
-                                                    Passed = 2;
+                                                    if (FileBuffer[BufferI] != PacketWork.FileBuffer[BufferI])
+                                                    {
+                                                        Passed = 2;
+                                                    }
                                                 }
                                             }
+                                            IntegrityProgressCurrent++;
+                                            PacketChunkO += PacketChunkSize;
                                         }
-                                        IntegrityProgressCurrent++;
-                                        PacketChunkO += PacketChunkSize;
+                                        F.close();
                                     }
-                                    F.close();
+                                    else
+                                    {
+                                        Passed = 4;
+                                    }
                                 }
                                 else
                                 {
                                     Passed = 4;
                                 }
-                            }
-                            else
-                            {
-                                Passed = 4;
-                            }
 
-                            if (IsQ)
-                            {
-                                IntegrityRangeStatusQ[RangeI] = Passed;
+                                if (IsQ)
+                                {
+                                    IntegrityRangeStatusQ[RangeI] = Passed;
+                                }
+                                else
+                                {
+                                    IntegrityRangeStatusP[RangeI] = Passed;
+                                }
+                                break;
                             }
-                            else
+                        case b00000111:
                             {
-                                IntegrityRangeStatusP[RangeI] = Passed;
-                            }
-                            break;
-                        }
-                    case b00000111:
-                        {
-                            // Setting the status as "Not tested"
-                            IntegrityRangeStatusP[RangeI] = 0;
-                            IntegrityRangeStatusQ[RangeI] = 0;
+                                // Setting the status as "Not tested"
+                                IntegrityRangeStatusP[RangeI] = 0;
+                                IntegrityRangeStatusQ[RangeI] = 0;
 
-                            // Creating the temporary file
-                            remove(IntegrityTempFileName.c_str());
-                            fstream F(IntegrityTempFileName, ios::binary | ios::out);
-                            F.close();
-                            break;
-                        }
-                    case b00000110:
-                        {
-                            // Removing the temporary file
-                            remove(IntegrityTempFileName.c_str());
-                            break;
-                        }
-                }
-                break;
+                                // Creating the temporary file
+                                remove(IntegrityTempFileName.c_str());
+                                fstream F(IntegrityTempFileName, ios::binary | ios::out);
+                                F.close();
+                                break;
+                            }
+                        case b00000110:
+                            {
+                                // Removing the temporary file
+                                remove(IntegrityTempFileName.c_str());
+                                break;
+                            }
+                    }
+                    break;
+            }
         }
     }
     IntegrityWorking = N;
 
 
-    // Changing the action status to "done"
+    // Changing the action status to "Done"
     IntegrityActionStatus[N] = 1;
 
 

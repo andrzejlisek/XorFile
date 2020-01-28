@@ -10,7 +10,7 @@ All operations in XorFile are designed to do sequentially in steps. Doing one st
 
 The mangle function operates on 4-bit numbers. Calculating one byte (8-bit number) is done by two separated calculations for lower and upper 4-bit parts.
 
-If b3, b2, b1 and b0 means four bits of number, the mangle function can be defined using following formula:
+If b3, b2, b1 and b0 means four bits of number, the mangle function can be defined using the following formula:
 M(b3, b2, b1, b0) = (b3 + b0, b3, b2, b1)
 
 The same function can be defined explicity as value array:
@@ -58,6 +58,13 @@ The 2-argument version of unmangle function meets following formulas:
 M(n, x) = y <=> UM(n, y) = x
 UM(n, M(n, x)) = x
 M(n, UM(n, x)) = x
+
+In 4-bit mangle function, there is simple dependance between mangle and unmangle function:
+UM(0, x) = M(15, x) = M(0, x) = x
+UM(1, x) = M(14, x)
+UM(2, x) = M(13, x)
+UM(3, x) = M(12, x)
+UM(n, x) = M(15 - n, x)
 
 The unmangle function has the same cycle as mangle function, but with opposite direction, so the moth functions can be defined using the same cycle array.
 
@@ -112,11 +119,11 @@ t1 ^ t2 = t3 ^ t4 <=> M(t1) ^ M(t2) = M(t3) ^ M(t4)
 # One data packet recovery principle using the P packet
 
 In bunch of n data packet with P packet, where k < n, all packets meets formula:
-D0 ^ D1 ^ .. ^ Dk ^ .. ^ Dn = P
+D0 ^ D1 ^ ... ^ Dk ^ ... ^ Dn = P
 
 If the Dk packet is missing, the above formula can be transformed using commutative and associative xor property:
-D0 ^ D1 ^ .. ^ Dk ^ .. ^ Dn ^ P = 0
-Dk = D0 ^ D1 ^ .. ^ Dn ^ P
+D0 ^ D1 ^ ... ^ Dk ^ ... ^ Dn ^ P = 0
+Dk = D0 ^ D1 ^ ... ^ Dn ^ P
 
 # One data packet recovery operation sequence using the P packet
 
@@ -130,11 +137,11 @@ Recovering Dk packet from n-packet bunch consists of following steps:
 # One data packet recovery principle using the Q packet
 
 In bunch of n data packet with Q packet, where k < n, all packets meets formula:
-M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(n, Dn) = Q
+M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(n, Dn) = Q
 
 If the Dk packet is missing, the above formula can be transformed using commutative and associative xor property:
-M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(n, Dn) ^ Q = 0
-M(k, Dk) = M(0, D0) ^ M(1, D1) ^ .. ^ M(n, Dn) ^ Q
+M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(n, Dn) ^ Q = 0
+M(k, Dk) = M(0, D0) ^ M(1, D1) ^ ... ^ M(n, Dn) ^ Q
 
 When M(k, Dk) is known, the Dk can be calculated using unmangle function:
 Dk = UM(k, M(k, Dk))
@@ -152,27 +159,27 @@ Recovering Dk packet from n-packet bunch consists of following steps:
 # Two data packets recovery principle using both P and Q
 
 If P and Q is available, k < l and l < n, the whole bunch meets following system of equations (spaces are added for more clarity):
-     D0  ^      D1  ^ .. ^      Dk  ^ .. ^      Dl  ^ .. ^      Dn  =      P
-M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(n, Dn) =      Q
+     D0  ^      D1  ^ ... ^      Dk  ^ ... ^      Dl  ^ ... ^      Dn  =      P
+M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(n, Dn) =      Q
 
 If Dk and Dl are missing, the Dk packet can be recovered without Dl packet and Dl packet can be recovered without Dk. Using Mangle injectivity, the system of equations can be transformed to following two systems of equations:
-M(k, D0) ^ M(k, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(k, Dl) ^ .. ^ M(k, Dn) = M(k, P)
-M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(n, Dn) =      Q
+M(k, D0) ^ M(k, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(k, Dl) ^ ... ^ M(k, Dn) = M(k, P)
+M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(n, Dn) =      Q
 
-M(l, D0) ^ M(l, D1) ^ .. ^ M(l, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(l, Dn) = M(l, P)
-M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(n, Dn) =      Q
+M(l, D0) ^ M(l, D1) ^ ... ^ M(l, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(l, Dn) = M(l, P)
+M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(n, Dn) =      Q
 
 The systems of equations can be transformed to single equations by calculating xor of both sides:
-M(k, D0) ^ M(k, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(k, Dl) ^ .. ^ M(k, Dn) ^ M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(n, Dn) = M(k, P) ^ Q
-M(l, D0) ^ M(l, D1) ^ .. ^ M(l, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(l, Dn) ^ M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(l, Dl) ^ .. ^ M(n, Dn) = M(l, P) ^ Q
+M(k, D0) ^ M(k, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(k, Dl) ^ ... ^ M(k, Dn) ^ M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(n, Dn) = M(k, P) ^ Q
+M(l, D0) ^ M(l, D1) ^ ... ^ M(l, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(l, Dn) ^ M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(l, Dl) ^ ... ^ M(n, Dn) = M(l, P) ^ Q
 
 Because the xor operation of two the same values gives 0, the values appearing twice can be ommited giving following equations:
-M(k, D0) ^ M(k, D1) ^ .. ^ M(k, Dl) ^ .. ^ M(k, Dn) ^ M(0, D0) ^ M(1, D1) ^ .. ^ M(l, Dl) ^ .. ^ M(n, Dn) = M(k, P) ^ Q
-M(l, D0) ^ M(l, D1) ^ .. ^ M(l, Dk) ^ .. ^ M(l, Dn) ^ M(0, D0) ^ M(1, D1) ^ .. ^ M(k, Dk) ^ .. ^ M(n, Dn) = M(l, P) ^ Q
+M(k, D0) ^ M(k, D1) ^ ... ^ M(k, Dl) ^ ... ^ M(k, Dn) ^ M(0, D0) ^ M(1, D1) ^ ... ^ M(l, Dl) ^ ... ^ M(n, Dn) = M(k, P) ^ Q
+M(l, D0) ^ M(l, D1) ^ ... ^ M(l, Dk) ^ ... ^ M(l, Dn) ^ M(0, D0) ^ M(1, D1) ^ ... ^ M(k, Dk) ^ ... ^ M(n, Dn) = M(l, P) ^ Q
 
 Above equation has only one unknown value, so it can be transformed to get XOR of the value:
-M(k, Dl) ^ M(l, Dl) = M(k, D0) ^ M(k, D1) ^ .. ^ M(k, Dn) ^ M(0, D0) ^ M(1, D1) ^ .. ^ M(n, Dn) = M(k, P) ^ Q
-M(l, Dk) ^ M(k, Dk) = M(l, D0) ^ M(l, D1) ^ .. ^ M(l, Dn) ^ M(0, D0) ^ M(1, D1) ^ .. ^ M(n, Dn) ^ M(l, P) ^ Q
+M(k, Dl) ^ M(l, Dl) = M(k, D0) ^ M(k, D1) ^ ... ^ M(k, Dn) ^ M(0, D0) ^ M(1, D1) ^ ... ^ M(n, Dn) = M(k, P) ^ Q
+M(l, Dk) ^ M(k, Dk) = M(l, D0) ^ M(l, D1) ^ ... ^ M(l, Dn) ^ M(0, D0) ^ M(1, D1) ^ ... ^ M(n, Dn) ^ M(l, P) ^ Q
 
 Using unmangle function, the Dk and Dl can be calculated using XMangle function:
 U(k, M(k, Dk) ^ M(l, Dk)) = M(l - k, Dk) ^ Dk <=> Dk = XM(l - k, Dk ^ M(l - k, Dk))
@@ -252,7 +259,7 @@ After that, you have to run XorFile application and open last used bunch definit
 
 # Testing bunch integrity
 
-XorFile allows check bunch integrity, i.e. check, if parity packets are correct against current data packets. You can check whole packets (one stripe from first to last byte) or specified fragments (stripes from specified to specified byte). This procedure requires as free storage space as sum of all stripes sizes.
+XorFile allows check bunch integrity, i.e. check, if parity packets are correct against current data packets. You can check whole packets (one stripe from first to last byte) or specified fragments (stripes from specified to specified byte). This procedure requires as free storage space as sum of all stripes sizes excepting of __P and Q sim__, which requires twice free storage space as sum of all stripes.
 
 This function can help in some cases, like, you not remember, if you added or removed data packet from bunch or it is possible, that at least one packet is unintentionally modified.
 
@@ -262,9 +269,10 @@ This functionality is available on __Bunch integrity__ tab. In the upper table, 
 * __Remove all stripes__ - Remove all stripes.
 
 To check consistency, you have to select one parity mode from following:
-* __P only__ - Tests integrity against P packet.
-* __Q only__ - Tests integrity against Q packet.
-* __P and Q__ - Tests integrity against both parity packets.
+* __P only__ - Tests integrity against P packet - required the same space as one packet.
+* __Q only__ - Tests integrity against Q packet - required the same space as one packet.
+* __P and Q seq__ - Tests integrity against both parity packets sequentially - required the same space as one packet and every data packet will be read twice.
+* __P and Q sim__ - Tests integrity against both parity packets simultaneously - required the twice space as one packet and every data packet will be read once.
 
 After selecting mode, you have to click __Generate__ to prepare test scenario. To perform operation, you can use __Set as waiting__, __Set as done__, __Set as postponed__ and __Perform waiting__ buttons in the same way, as in P/Q create and data packet recovery scenarios.
 
@@ -275,9 +283,10 @@ On the __Index editor__ tab, you can edit packet contents and check integrity of
 * __Add new file__ - Adds new file, where name and size is given be user. It is possible to add dummy file by giving blank file name and non-zero size.
 * __Remove__ - Removes selected item.
 * __Move up__ and __ Move down__ - Moves selected item across the list.
-* __Get digest - selected__ - Calculates the file digest for selected item and stores it in the index.
+* __Get digest - sel__ - Calculates the file digest for selected item and stores it in the index.
 * __Get digest - all__ - Calculates the file digest for all items and stores it in the index.
-* __Test digest - selected__ - Calculates the digest for selected item and compares with the stored digest, the result will be displayed in the __Status__ field.
+* __Test sizes__ - Checks, if the file exists and the phisical file sise is the same as file size defined in the index.
+* __Test digest - sel__ - Calculates the digest for selected item and compares with the stored digest, the result will be displayed in the __Status__ field.
 * __Test digest - all__ - Calculates the digest for all items and compares with the stored digest, the result will be displayed in the __Status__ field.
 * __Change digest__ - Allows to manually change digest stored in the index.
 * __Change size__ - Allows to change size of item, this operation does not affect the phisical file.

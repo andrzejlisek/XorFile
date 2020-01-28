@@ -5,6 +5,8 @@
 #include <string>
 #include <fstream>
 
+#define PacketToText(X) (((X) >= 0) ? (((X) < 10) ? ("D0" + to_string(X)) : ("D" + to_string(X))) : (((X) == -1) ? "P" : (((X) == -2) ? "Q" : "?")))
+
 using namespace std;
 class XorAction
 {
@@ -33,8 +35,7 @@ public:
     int OutData;
     string MSG;
 
-    void TextDataSave(vector<string> &Buf);
-    void TextDataLoad(vector<string> &Buf, uint &BufI);
+    void TextDataSet();
 };
 
 #endif // XORACTION_H

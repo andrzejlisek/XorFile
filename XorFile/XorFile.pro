@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     filepacket.cpp \
     filepacketedit.cpp \
     filedir.cpp \
-    eden.cpp
+    eden.cpp \
+    configfile.cpp
 
 HEADERS  += mainwindow.h \
     hashcalcmd5.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindow.h \
     filedir.h \
     binary.h \
     eden.h \
-    objmem.h
+    objmem.h \
+    configfile.h
 
 FORMS    += mainwindow.ui
 

@@ -29,32 +29,26 @@ void FilePacket::Clear()
 bool FilePacket::LoadIndex(string FileName)
 {
     Clear();
-
-    fstream IdxF(FileName.c_str(), ios::in);
-    if (IdxF.is_open())
+    EdenClass::ConfigFile CF;
+    if (CF.FileLoad(FileName))
     {
+        int N = CF.ParamGetI("IdxFile");
         PacketSize = 0;
         llong ByteCounter = 0;
-        string Buf;
-        getline(IdxF, Buf);
-        while (Buf[0] != '*')
+        for (int I = 0; I < N; I++)
         {
-            IdxFileName.push_back(Buf);
-            getline(IdxF, Buf);
-            llong FS = Eden::ToLLong(Buf);
+            IdxFileName.push_back(CF.ParamGetS("IdxFile" + to_string(I) + "Name"));
+            llong FS = CF.ParamGetL("IdxFile" + to_string(I) + "Size");
             PacketSize += FS;
             IdxFileSize.push_back(FS);
             IdxFileBegin.push_back(ByteCounter);
             ByteCounter = ByteCounter + FS;
             IdxFileEnd.push_back(ByteCounter - 1);
-            getline(IdxF, Buf);
-            IdxFileDigest.push_back(Buf);
-            getline(IdxF, Buf);
+            IdxFileDigest.push_back(CF.ParamGetS("IdxFile" + to_string(I) + "Digest"));
             IdxFileInfo.push_back("");
             IdxFileInclude.push_back(true);
         }
-        WorkDir = Buf = Buf.substr(1);
-        IdxF.close();
+        WorkDir = CF.ParamGetS("WorkDir");
         CurrentFileName = FileName;
         return true;
     }
@@ -71,25 +65,18 @@ bool FilePacket::LoadIndex(string FileName)
 ///
 bool FilePacket::SaveIndex(string FileName)
 {
-    fstream IdxF(FileName.c_str(), ios::out);
-    if (IdxF.is_open())
+    EdenClass::ConfigFile CF;
+    int N = IdxFileName.size();
+    CF.ParamSet("IdxFile", N);
+    for (int I = 0; I < N; I++)
     {
-        int N = IdxFileName.size();
-        for (int I = 0; I < N; I++)
-        {
-            IdxF << IdxFileName[I] << endl;
-            IdxF << IdxFileSize[I] << endl;
-            IdxF << IdxFileDigest[I] << endl;
-        }
-        IdxF << "*" << WorkDir << endl;
-        IdxF.close();
-        CurrentFileName = FileName;
-        return true;
+        CF.ParamSet("IdxFile" + to_string(I) + "Name", IdxFileName[I]);
+        CF.ParamSet("IdxFile" + to_string(I) + "Size", IdxFileSize[I]);
+        CF.ParamSet("IdxFile" + to_string(I) + "Digest", IdxFileDigest[I]);
     }
-    else
-    {
-        return false;
-    }
+    CF.ParamSet("WorkDir", WorkDir);
+    CurrentFileName = FileName;
+    return CF.FileSave(FileName);
 }
 
 ///
@@ -333,4 +320,19 @@ void FilePacket::CalcRange(llong Range1, llong Range2)
             }
         }
     }
+}
+
+void FilePacket::BatchItemListAll()
+{
+    BatchItemList.clear();
+    for (uint I = 0; I < IdxFileName.size(); I++)
+    {
+        BatchItemList.push_back(I);
+    }
+}
+
+void FilePacket::BatchItemListCurrent(int I)
+{
+    BatchItemList.clear();
+    BatchItemList.push_back(I);
 }
