@@ -39,8 +39,8 @@ public:
     int GetPacketQuan();
     vector<XorAction> ActionList;
     void ProjectNew();
-    void ProjectLoad(string FileName);
-    void ProjectSave(string FileName);
+    void ProjectLoad(string FileName, string FilePath);
+    void ProjectSave(string FileName, string FilePath);
     void ActionSetStatus(uint N, int S);
     void ActionPerformWaiting();
     void ActionPerformWaitingWork();

@@ -700,10 +700,8 @@ void AppCore::ProjectNew()
 /// \brief AppCore::ProjectLoad - Loading bunch file
 /// \param FileName
 ///
-void AppCore::ProjectLoad(string FileName)
+void AppCore::ProjectLoad(string FileName, string FilePath)
 {
-    //ProjectLoad_old(FileName);
-
     EdenClass::ConfigFile CF;
     CF.FileLoad(FileName);
     int I;
@@ -715,18 +713,18 @@ void AppCore::ProjectLoad(string FileName)
     for (I = 0; I < DataN; I++)
     {
         StatusD[I] = CF.ParamGetI("Data" + to_string(I) + "Status");
-        FileD[I] = CF.ParamGetS("Data" + to_string(I) + "File");
+        FileD[I] = EdenClass::FileDir::DirRelativeToAbsolute(FilePath, CF.ParamGetS("Data" + to_string(I) + "File"));
         DirD[I] = CF.ParamGetS("Data" + to_string(I) + "Dir");
         SizeD[I] = -3;
     }
 
     // P and Q packets
     StatusP = CF.ParamGetI("ParityPStatus");
-    FileP = CF.ParamGetS("ParityPFile");
+    FileP = EdenClass::FileDir::DirRelativeToAbsolute(FilePath, CF.ParamGetS("ParityPFile"));
     DirP = CF.ParamGetS("ParityPDir");
     SizeP = -3;
     StatusQ = CF.ParamGetI("ParityQStatus");
-    FileQ = CF.ParamGetS("ParityQFile");
+    FileQ = EdenClass::FileDir::DirRelativeToAbsolute(FilePath, CF.ParamGetS("ParityQFile"));
     DirQ = CF.ParamGetS("ParityQDir");
     SizeQ = -3;
 
@@ -793,10 +791,8 @@ void AppCore::ProjectLoad(string FileName)
 /// \brief AppCore::ProjectSave - Saving the bunch
 /// \param FileName
 ///
-void AppCore::ProjectSave(string FileName)
+void AppCore::ProjectSave(string FileName, string FilePath)
 {
-    //ProjectSave_old(FileName);
-
     EdenClass::ConfigFile CF;
     int I;
 
@@ -807,24 +803,24 @@ void AppCore::ProjectSave(string FileName)
     for (I = 0; I < DataN; I++)
     {
         CF.ParamSet("Data" + to_string(I) + "Status", StatusD[I]);
-        CF.ParamSet("Data" + to_string(I) + "File", FileD[I]);
+        CF.ParamSet("Data" + to_string(I) + "File", EdenClass::FileDir::DirAbsoluteToRelative(FilePath, FileD[I]));
         CF.ParamSet("Data" + to_string(I) + "Dir", DirD[I]);
     }
 
     // P and Q packets
     CF.ParamSet("ParityPStatus", StatusP);
-    CF.ParamSet("ParityPFile", FileP);
+    CF.ParamSet("ParityPFile", EdenClass::FileDir::DirAbsoluteToRelative(FilePath, FileP));
     CF.ParamSet("ParityPDir", DirP);
     CF.ParamSet("ParityQStatus", StatusQ);
-    CF.ParamSet("ParityQFile", FileQ);
+    CF.ParamSet("ParityQFile", EdenClass::FileDir::DirAbsoluteToRelative(FilePath, FileQ));
     CF.ParamSet("ParityQDir", DirQ);
 
     // Quantity of actions
-    DataN = ActionList.size();
-    CF.ParamSet("Action", DataN);
+    int TempN = ActionList.size();
+    CF.ParamSet("Action", TempN);
 
     // Action list
-    for (I = 0; I < DataN; I++)
+    for (I = 0; I < TempN; I++)
     {
         CF.ParamSet("Action" + to_string(I) + "Type", ActionList[I].ActionType);
         CF.ParamSet("Action" + to_string(I) + "Status", ActionList[I].ActionStatus);
@@ -843,7 +839,7 @@ void AppCore::ProjectSave(string FileName)
     CF.ParamSet("IntegrityTempFileName", IntegrityTempFileName);
 
     // Quantity of test data stripes
-    int TempN = IntegrityRangeBegin.size();
+    TempN = IntegrityRangeBegin.size();
     CF.ParamSet("IntegrityRange", TempN);
 
     // Test data stripes

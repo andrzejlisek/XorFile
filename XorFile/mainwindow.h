@@ -102,6 +102,7 @@ private slots:
 
 private:
     QString ProjectFileName = "";
+    QString ProjectFilePath = "";
     Ui::MainWindow *ui;
     void RefreshActionList(bool UpdateText);
     void RefreshPacketList(bool UpdateText);

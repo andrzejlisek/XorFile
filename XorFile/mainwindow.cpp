@@ -209,6 +209,7 @@ void MainWindow::on_ProjectNew_clicked()
     RefreshIntegrityRangeList(false);
     RefreshIntegrityScenario(false);
     ProjectFileName = "";
+    ProjectFilePath = "";
 }
 
 void MainWindow::on_ProjectLoad_clicked()
@@ -217,7 +218,7 @@ void MainWindow::on_ProjectLoad_clicked()
     SaveLastPath(FN, false);
     if (!FN.isEmpty())
     {
-        Core.ProjectLoad(Eden::ToStr(FN));
+        Core.ProjectLoad(Eden::ToStr(FN), Eden::ToStr(QFileInfo(FN).path()));
         ui->DataPacketN->setValue(Core.GetPacketQuan());
         RefreshActionList(false);
         Core.ReadSizes();
@@ -228,6 +229,7 @@ void MainWindow::on_ProjectLoad_clicked()
         RefreshIntegrityRangeList(false);
         RefreshIntegrityScenario(false);
         ProjectFileName = FN;
+        ProjectFilePath = QFileInfo(ProjectFileName).path();
     }
 }
 
@@ -238,7 +240,7 @@ void MainWindow::on_ProjectSave_clicked()
         llong R1 = Eden::ToLLong(Eden::ToStr(ui->Range1T->text()));
         llong R2 = Eden::ToLLong(Eden::ToStr(ui->Range2T->text()));
         Core.WorkRangeSet(R1, R2);
-        Core.ProjectSave(Eden::ToStr(ProjectFileName));
+        Core.ProjectSave(Eden::ToStr(ProjectFileName), Eden::ToStr(ProjectFilePath));
     }
     else
     {
@@ -255,8 +257,9 @@ void MainWindow::on_ProjectSaveAs_clicked()
         llong R1 = Eden::ToLLong(Eden::ToStr(ui->Range1T->text()));
         llong R2 = Eden::ToLLong(Eden::ToStr(ui->Range2T->text()));
         Core.WorkRangeSet(R1, R2);
-        Core.ProjectSave(Eden::ToStr(FN));
+        Core.ProjectSave(Eden::ToStr(FN), Eden::ToStr(QFileInfo(FN).path()));
         ProjectFileName = FN;
+        ProjectFilePath = QFileInfo(ProjectFileName).path();
     }
 }
 
