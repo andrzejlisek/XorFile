@@ -2,7 +2,7 @@
 
 FilePacketEdit::FilePacketEdit()
 {
-
+    DigestObj = NULL;
 }
 
 FilePacketEdit::~FilePacketEdit()
